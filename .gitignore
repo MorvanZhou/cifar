@@ -1,0 +1,6 @@
+*.tar.gz
+.idea
+tmp_data/
+tmp_upload/
+models/
+*.log

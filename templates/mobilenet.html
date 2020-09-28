@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>AI image prediction</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>图片识别</h1>
+<h2>预测类别:</h2>
+<p>{{ classes }}</p>
+
+<form action="{{ post_url }}" method="post" enctype="multipart/form-data" id="form">
+    <input type="file" name="file" id="file" accept="image/*" onclick="this.value=null" onchange="processFile(event)">
+</form>
+<img id="preview-img" src="#" alt="your image" style="max-width: 300px;height: auto;display:none;">
+<div id="result"></div>
+
+</body>
+
+<script>
+var processFile = function(event) {
+  var preview = document.getElementById('preview-img');
+  preview.src = URL.createObjectURL(event.target.files[0]);
+  preview.onload = function() {
+      URL.revokeObjectURL(preview.src) // free memory
+  };
+  preview.style.display = "block";
+
+  var form = $("#form");
+  var formData = new FormData(form[0]);
+  $.ajax({
+    type: 'post',
+    url: '{{ post_url }}',
+      enctype: 'multipart/form-data',
+      processData: false,
+      contentType: false,
+    data: formData,
+    error: function (resp) {
+        alert("model predict error " + resp);
+        console.log(resp);
+    },
+    success: function (resp) {
+        var resDiv = $("#result");
+        resDiv.empty();
+        resDiv.append($("<h2>").text("结果:"));
+        var ol = $("<ol>");
+        for (i = 0; i < resp.length; i++) {
+         ol.append($("<li>").text(resp[i]["percent"] + " - " + resp[i]["name"]).css("white-space", "pre"))
+        }
+        resDiv.append(ol)
+    }
+  });
+
+}
+
+</script>
+</html>
